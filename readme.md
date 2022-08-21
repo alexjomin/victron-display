@@ -1,4 +1,6 @@
-# 
+# Victron Display 
+
+![](doc/img/hacking.jpg)
 
 ## Introduction
 
@@ -12,6 +14,14 @@ I want to have a display in my van to see :
 - Current State of the MPTT Controller
 - Maximum power
 - Minimum and maximum voltage
+
+Roadmap:
+
+- [X] Parsing VE.Direct protocol
+- [X] Connect to the MPTT
+- [X] Flashing the pico nano with firmware
+- [ ] Add a display
+- [ ] Testing, optimizing, reliability (still memory issue)
 
 ### Flash the pico
 

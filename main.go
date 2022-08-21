@@ -39,8 +39,9 @@ func main() {
 	ms := runtime.MemStats{}
 
 	for {
-		led.High()
 		if uart.Buffered() > 0 {
+			led.High()
+
 			data, err := uart.ReadByte()
 			if err != nil {
 				println(err)
@@ -73,6 +74,8 @@ func main() {
 				runtime.GC()
 
 			}
+
+			led.Low()
 
 		}
 	}
