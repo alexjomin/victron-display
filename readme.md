@@ -25,6 +25,8 @@ tinygo flash -target=pico main.go
 go test -v ./vedirect
 ```
 
+It relies on a dump of my `SmartSolar 100/20`
+
 ### Buil and see alloc
 
 ```
