@@ -1,3 +1,3 @@
-module gitlab.com/alexjomin/victron
+module github.com/alexjomin/victron
 
 go 1.18

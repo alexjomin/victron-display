@@ -2,8 +2,9 @@ package main
 
 import (
 	"machine"
+	"runtime"
 
-	"gitlab.com/alexjomin/victron/vedirect"
+	"github.com/alexjomin/victron/vedirect"
 )
 
 const (
@@ -35,6 +36,8 @@ func main() {
 		println(err)
 	}
 
+	ms := runtime.MemStats{}
+
 	for {
 		led.High()
 		if uart.Buffered() > 0 {
@@ -62,7 +65,12 @@ func main() {
 				}
 				state.Update(*f)
 				println(state.BatteryVoltage, state.OperationState)
-				f = nil
+
+				runtime.ReadMemStats(&ms)
+				println("Heap before GC. Used: ", ms.HeapInuse, " Free: ", ms.HeapIdle, " Meta: ", ms.GCSys)
+
+				// Force Garbage Collection
+				runtime.GC()
 
 			}
 

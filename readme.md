@@ -13,7 +13,7 @@ I want to have a display in my van to see :
 - Maximum power
 - Minimum and maximum voltage
 
-### Flash the pico 
+### Flash the pico
 
 ```
 tinygo flash -target=pico main.go
