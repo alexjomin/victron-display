@@ -31,26 +31,25 @@ type Parser struct {
 	Ready        bool
 }
 
-func NewParser() (*Parser, error) {
-
-	return &Parser{
+func NewParser() (Parser, error) {
+	return Parser{
 		currentState: stateWaitHeader,
 		KV:           KeyValue{},
+		Ready:        false,
 	}, nil
 }
 
-func (p *Parser) GetFrame() (*KeyValue, error) {
+func (p Parser) GetKV() (data KeyValue, err error) {
 	if p.Ready {
-		data := p.KV
+		data = p.KV
 		p.KV = KeyValue{}
-		p.Ready = false
-		return &data, nil
+		return data, nil
 	}
-	return nil, errors.New("parser is not ready")
+	return data, errors.New("parser is not ready")
 
 }
 
-func (p *Parser) ParseByte(b byte) error {
+func (p Parser) ParseByte(b byte) (Parser, error) {
 	if b == hexmarker && p.currentState != stateChecksum {
 		p.currentState = stateHex
 	}
@@ -65,7 +64,7 @@ func (p *Parser) ParseByte(b byte) error {
 		case linefeed:
 			p.currentState = stateKey
 		}
-		return nil
+		return p, nil
 
 	case stateKey:
 		p.checksum += int(b)
@@ -75,10 +74,10 @@ func (p *Parser) ParseByte(b byte) error {
 			} else {
 				p.currentState = stateValue
 			}
-			return nil
+			return p, nil
 		}
 		p.key += string(b)
-		return nil
+		return p, nil
 
 	case stateValue:
 		p.checksum += int(b)
@@ -88,16 +87,16 @@ func (p *Parser) ParseByte(b byte) error {
 			if err != nil {
 				p.key = ""
 				p.value = ""
-				return nil
+				return p, nil
 			}
 			p.KV[p.key] = p.value
 			p.key = ""
 			p.value = ""
-			return nil
+			return p, nil
 		}
 
 		p.value += string(b)
-		return nil
+		return p, nil
 
 	case stateChecksum:
 		p.checksum += int(b)
@@ -106,7 +105,7 @@ func (p *Parser) ParseByte(b byte) error {
 		p.currentState = stateWaitHeader
 		if p.checksum%256 != 0 {
 			p.checksum = 0
-			return ErrCheckSumNotValid
+			return p, ErrCheckSumNotValid
 		}
 		p.Ready = true
 		p.checksum = 0
@@ -117,6 +116,5 @@ func (p *Parser) ParseByte(b byte) error {
 			p.currentState = stateWaitHeader
 		}
 	}
-
-	return nil
+	return p, nil
 }

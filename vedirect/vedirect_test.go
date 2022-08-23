@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-//go:embed testdata/smart-solar.dump
+//go:embed testdata/bluesolar_1.23.dump
 var fulldump []byte
 
 func TestParser_ParseByte(t *testing.T) {
@@ -36,7 +36,7 @@ func TestParser_ParseByte(t *testing.T) {
 			s, _ := NewState()
 
 			for _, b := range tt.args.b {
-				if err := p.ParseByte(b); (err != nil) != tt.wantErr {
+				if p, err = p.ParseByte(b); (err != nil) != tt.wantErr {
 					if err == ErrCheckSumNotValid {
 						t.Log(err)
 						continue
@@ -48,14 +48,8 @@ func TestParser_ParseByte(t *testing.T) {
 					if err != nil {
 						t.Errorf("NewFrame error = %v", err)
 					}
-					// dump, err := json.Marshal(f)
-					// if err != nil {
-					// 	t.Error(err)
-					// }
-					// t.Logf("%d", f.MainBatteryVoltage)
-					s.Update(*f)
+					s = s.Update(f)
 					t.Logf("%+v", s)
-
 				}
 			}
 		})

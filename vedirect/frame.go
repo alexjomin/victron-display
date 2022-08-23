@@ -1,7 +1,7 @@
 package vedirect
 
 import (
-	"fmt"
+	"errors"
 	"strconv"
 )
 
@@ -43,70 +43,61 @@ var productList = map[string]string{
 }
 
 type Frame struct {
-	BatteryCurrent     *int    `json:"battery_current,omitempty"`
-	DaySequenceNumber  *int    `json:"day_sequence_number,omitempty"`
-	ErrorCode          *string `json:"error_code,omitempty"`
-	FirmwareVersion    *string `json:"firmware_version,omitempty"`
-	InstantaneousPower *int    `json:"instantaneous_power,omitempty"`
-	LoadCurrent        *int    `json:"load_current,omitempty"`
-	LoadOutputState    *bool   `json:"load_output_state,omitempty"`
-	MainBatteryVoltage *int    `json:"main_battery_voltage,omitempty"`
-	MaxPowerToday      *int    `json:"max_power_today,omitempty"`
-	MaxPowerYesterday  *int    `json:"max_power_yesterday,omitempty"`
-	PanelPower         *int    `json:"panel_power,omitempty"`
-	PanelVoltage       *int    `json:"panel_voltage,omitempty"`
-	ProductName        *string `json:"product_id,omitempty"`
-	RelayState         *bool   `json:"relay_state,omitempty"`
-	SerialNumber       *string `json:"serial_number,omitempty"`
-	StateOfOperation   *string `json:"state_of_operation,omitempty"`
-	YieldToday         *int    `json:"yield_today,omitempty"`
-	YieldTotal         *int    `json:"yield_total,omitempty"`
-	YieldYesterday     *int    `json:"yield_yesterday,omitempty"`
+	BatteryCurrent     int    `json:"battery_current,omitempty"`
+	DaySequenceNumber  int    `json:"day_sequence_number,omitempty"`
+	ErrorCode          string `json:"error_code,omitempty"`
+	FirmwareVersion    string `json:"firmware_version,omitempty"`
+	InstantaneousPower int    `json:"instantaneous_power,omitempty"`
+	LoadCurrent        int    `json:"load_current,omitempty"`
+	LoadOutputState    bool   `json:"load_output_state,omitempty"`
+	MainBatteryVoltage int    `json:"main_battery_voltage,omitempty"`
+	MaxPowerToday      int    `json:"max_power_today,omitempty"`
+	MaxPowerYesterday  int    `json:"max_power_yesterday,omitempty"`
+	PanelPower         int    `json:"panel_power,omitempty"`
+	PanelVoltage       int    `json:"panel_voltage,omitempty"`
+	ProductName        string `json:"product_id,omitempty"`
+	RelayState         bool   `json:"relay_state,omitempty"`
+	SerialNumber       string `json:"serial_number,omitempty"`
+	StateOfOperation   string `json:"state_of_operation,omitempty"`
+	YieldToday         int    `json:"yield_today,omitempty"`
+	YieldTotal         int    `json:"yield_total,omitempty"`
+	YieldYesterday     int    `json:"yield_yesterday,omitempty"`
 }
 
-func NewFrame(kv KeyValue) (*Frame, error) {
-	f := &Frame{}
+func NewFrame(kv KeyValue) (f Frame, err error) {
 	for k, v := range kv {
-		err := f.parseKV(k, v)
+		f, err = f.parseKV(k, v)
 		if err != nil {
-			return nil, err
+			return
 		}
 	}
-	return f, nil
+	return
 }
 
 func toBoolPointer(b bool) *bool {
 	return &b
 }
 
-func parseInt(v string) (*int, error) {
-	ps, err := strconv.Atoi(v)
-	if err != nil {
-		return nil, err
-	}
-	return &ps, nil
+func parseInt(v string) (i int, err error) {
+	return strconv.Atoi(v)
 }
 
-func parseLoadOutputState(v string) (state *bool, err error) {
-
+func parseLoadOutputState(v string) (state bool, err error) {
 	switch v {
 	case "ON":
-		state = toBoolPointer(true)
+		state = true
 	case "OFF":
-		state = toBoolPointer(false)
+		state = false
 	default:
-		return nil, fmt.Errorf("can't parse state value `%s`", v)
+		return false, toError("can't parse state value" + v)
 	}
-
 	return
 }
 
-func parseErrorCode(v string) (*string, error) {
-	var errorMsg string
-
+func parseErrorCode(v string) (errorMsg string, err error) {
 	switch v {
 	case "0":
-		return nil, nil
+		return "", nil
 	case "2":
 		errorMsg = "Battery voltage too high"
 	case "17":
@@ -134,155 +125,162 @@ func parseErrorCode(v string) (*string, error) {
 	case "119":
 		errorMsg = "User settings invalid"
 	default:
-		return nil, fmt.Errorf("error code `%s` is unknown", v)
+
+		return "", toError("error code is unknown:" + v)
 	}
 
-	return &errorMsg, nil
+	return errorMsg, nil
 }
 
-func parseDevice(v string) (*string, error) {
+func toError(v string) error {
+	return errors.New(v)
+}
+
+func parseDevice(v string) (string, error) {
 	if d, ok := productList[v]; ok {
 		devicename := string(d)
-		return &devicename, nil
+		return devicename, nil
 	}
-	return nil, fmt.Errorf("can't find specified device %s", v)
+	return "", toError("can't find specified device: " + v)
 }
 
-func parseOperationState(v string) (*string, error) {
+func parseOperationState(v string) (string, error) {
 	if state, ok := operationStates[v]; ok {
-		return &state, nil
+		return state, nil
 	}
-	return nil, fmt.Errorf("can't find specified operation state %s", v)
+	return "", toError("can't find specified operation state: " + v)
 }
 
-func (f *Frame) parseKV(k, v string) error {
+func (f Frame) parseKV(k, v string) (rf Frame, err error) {
+
+	rf = f
 	switch k {
 	case BatteryCurrent:
 		i, err := parseInt(v)
 		if err != nil {
-			return fmt.Errorf("can't parse battery value %s - %w", v, err)
+			return f, toError("can't parse battery value: " + v)
 		}
-		f.BatteryCurrent = i
+		rf.BatteryCurrent = i
 
 	case DaySequenceNumber:
 		d, err := parseInt(v)
 		if err != nil {
-			return fmt.Errorf("can't parse day sequence number value %s - %w", v, err)
+			return f, toError("can't parse day sequence number value: " + v)
 		}
-		f.DaySequenceNumber = d
+		rf.DaySequenceNumber = d
 
 	case ErrorCode:
 		e, err := parseErrorCode(v)
 		if err != nil {
-			return err
+			return f, err
 		}
-		f.ErrorCode = e
+		rf.ErrorCode = e
 
 	case FirmwareVersion:
-		f.FirmwareVersion = &v
+		rf.FirmwareVersion = v
 
 	case InstantaneousPower:
 		p, err := parseInt(v)
 		if err != nil {
-			return fmt.Errorf("can't parse instantaneous power %s - %w", v, err)
+			return f, toError("can't parse instantaneous power" + v)
 		}
 		f.InstantaneousPower = p
 
 	case LoadCurrent:
 		c, err := parseInt(v)
 		if err != nil {
-			return fmt.Errorf("can't parse load current %s - %w", v, err)
+			return f, toError("can't parse load current: " + v)
 		}
-		f.LoadCurrent = c
+		rf.LoadCurrent = c
 
 	case LoadOutputState:
 		s, err := parseLoadOutputState(v)
 		if err != nil {
-			return err
+			return f, err
 		}
-		f.LoadOutputState = s
+		rf.LoadOutputState = s
 
 	case MainBatteryVoltage:
 		s, err := parseInt(v)
 		if err != nil {
-			return fmt.Errorf("can't parse main battery voltage %s - %w", v, err)
+			return f, toError("can't parse main battery voltage: " + v)
 		}
-		f.MainBatteryVoltage = s
+		rf.MainBatteryVoltage = s
 
 	case MaxPowerToday:
 		s, err := parseInt(v)
 		if err != nil {
-			return fmt.Errorf("can't parse max power today %s - %w", v, err)
+			return f, toError("can't parse max power today: " + v)
 		}
 		f.MaxPowerToday = s
 
 	case MaxPowerYesterday:
 		s, err := parseInt(v)
 		if err != nil {
-			return fmt.Errorf("can't parse max power yesterday %s - %w", v, err)
+			return f, toError("can't parse max power yesterday: " + v)
 		}
-		f.MaxPowerYesterday = s
+		rf.MaxPowerYesterday = s
 
 	case PanelPower:
 		s, err := parseInt(v)
 		if err != nil {
-			return fmt.Errorf("can't parse panel power %s - %w", v, err)
+			return f, toError("can't parse panel power: " + v)
 		}
 		f.PanelPower = s
 
 	case PanelVoltage:
 		s, err := parseInt(v)
 		if err != nil {
-			return fmt.Errorf("can't parse panel voltage %s - %w", v, err)
+			return f, toError("can't parse panel voltage: " + v)
 		}
-		f.PanelVoltage = s
+		rf.PanelVoltage = s
 
 	case ProductID:
 		s, err := parseDevice(v)
 		if err != nil {
-			return fmt.Errorf("can't parse device %s - %w", v, err)
+			return f, toError("can't parse device: " + v)
 		}
-		f.ProductName = s
+		rf.ProductName = s
 
 	case RelayState:
 		s, err := parseLoadOutputState(v)
 		if err != nil {
-			return fmt.Errorf("can't parse device %s - %w", v, err)
+			return f, toError("can't parse device" + v)
 		}
 		f.RelayState = s
 
 	case SerialNumber:
-		f.SerialNumber = &v
+		rf.SerialNumber = v
 
 	case StateOfOperation:
 		s, err := parseOperationState(v)
 		if err != nil {
-			return err
+			return f, err
 		}
-		f.StateOfOperation = s
+		rf.StateOfOperation = s
 
 	case YieldToday:
 		s, err := parseInt(v)
 		if err != nil {
-			return fmt.Errorf("can't parse yield today %s - %w", v, err)
+			return f, toError("can't parse yield today:" + v)
 		}
-		f.YieldToday = s
+		rf.YieldToday = s
 
 	case YieldTotal:
 		s, err := parseInt(v)
 		if err != nil {
-			return fmt.Errorf("can't parse yield total %s - %w", v, err)
+			return f, toError("can't parse yield total:" + v)
 		}
-		f.YieldTotal = s
+		rf.YieldTotal = s
 
 	case YieldYesterday:
 		s, err := parseInt(v)
 		if err != nil {
-			return fmt.Errorf("can't parse yield yesterday %s - %w", v, err)
+			return f, toError("can't parse yield yesterday: " + v)
 		}
-		f.YieldYesterday = s
+		rf.YieldYesterday = s
 
 	}
 
-	return nil
+	return
 }

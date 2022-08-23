@@ -48,30 +48,28 @@ func main() {
 				continue
 			}
 			// print(string(data))
-			err = parser.ParseByte(data)
+			parser, err = parser.ParseByte(data)
 			if err != nil {
 				println(err)
 				continue
 			}
 
 			if parser.Ready {
-				data, _ := parser.GetFrame()
+				data, _ := parser.GetKV()
 				if data == nil {
 					continue
 				}
-				f, err := vedirect.NewFrame(*data)
+				parser.Ready = false
+				f, err := vedirect.NewFrame(data)
 				if err != nil {
 					println(err)
 					continue
 				}
-				state.Update(*f)
+				state = state.Update(f)
 				println(state.BatteryVoltage, state.OperationState)
 
 				runtime.ReadMemStats(&ms)
 				println("Heap before GC. Used: ", ms.HeapInuse, " Free: ", ms.HeapIdle, " Meta: ", ms.GCSys)
-
-				// Force Garbage Collection
-				runtime.GC()
 
 			}
 

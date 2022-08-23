@@ -20,8 +20,22 @@ Roadmap:
 - [X] Parsing VE.Direct protocol
 - [X] Connect to the MPTT
 - [X] Flashing the pico nano with firmware
+- [X] Refactoring to avoid heap allocations
 - [ ] Add a display
-- [ ] Testing, optimizing, reliability (still memory issue)
+- [ ] Testing, optimizing, reliability
+
+### Hardware 
+
+#### Socket
+
+You will need a `JST PH 4` female socket to conntect your Victron device to the Raspberry
+
+<img src="doc/img/plug.jpg"  width="200" />
+
+#### Microcontroller
+
+In this POC I used a Rasbberry Pico, cheap and well supported by TinyGO: https://tinygo.org/docs/reference/microcontrollers/pico/
+
 
 ### Flash the pico
 
@@ -37,8 +51,17 @@ go test -v ./vedirect
 
 It relies on a dump of my `SmartSolar 100/20`
 
-### Buil and see alloc
+### Build and track heap allocation
+
+More info available [here](https://tinygo.org/docs/concepts/compiler-internals/heap-allocation/).
+
+As you may see, I had to modify a bit my usual gopher habits to reduce the number of heap allocations, in order to optimize the memory management of the microcontroller.
+
+Here some adjumemts
+- no pointer in "constructor like" method (aka `New() (*myStruct, err)`)
+- passing by value instead of reference in method :
+  - ex `func (m *myStruct) myMethod error` --> `func (m myStruct) myMethod (m myStruct, err error)`
 
 ```
-tinygo build -o firmware.uf2 -target=pico -print-allocs=. main.go
+tinygo build -o firmware.uf2 -target=pico -print-allocs=.  main.go 2> >(grep victron)
 ```

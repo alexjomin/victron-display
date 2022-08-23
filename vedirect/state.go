@@ -24,10 +24,10 @@ type State struct {
 	OperationState string
 }
 
-func (s *State) Update(f Frame) {
-	if f.MainBatteryVoltage != nil {
+func (s State) Update(f Frame) State {
+	if f.MainBatteryVoltage != 0 {
 		if s.currentIndex < numberOfVoltage {
-			s.batteryVoltageBuffer[s.currentIndex] = *f.MainBatteryVoltage
+			s.batteryVoltageBuffer[s.currentIndex] = f.MainBatteryVoltage
 			s.currentIndex += 1
 		} else {
 			s.currentIndex = 0
@@ -60,37 +60,19 @@ func (s *State) Update(f Frame) {
 		}
 	}
 
-	if f.PanelPower != nil {
-		s.PanelPower = *f.PanelPower
-	}
+	s.PanelPower = f.PanelPower
+	s.PanelVoltage = f.PanelVoltage
+	s.BatteryCurrent = f.BatteryCurrent
+	s.OperationState = f.StateOfOperation
+	s.LoadCurrent = f.LoadCurrent
+	s.LoadOutputState = f.LoadOutputState
+	s.MaxPower = f.MaxPowerToday
 
-	if f.PanelVoltage != nil {
-		s.PanelVoltage = *f.PanelVoltage
-	}
-
-	if f.BatteryCurrent != nil {
-		s.BatteryCurrent = *f.BatteryCurrent
-	}
-
-	if f.StateOfOperation != nil {
-		s.OperationState = *f.StateOfOperation
-	}
-
-	if f.LoadCurrent != nil {
-		s.LoadCurrent = *f.LoadCurrent
-	}
-
-	if f.LoadOutputState != nil {
-		s.LoadOutputState = *f.LoadOutputState
-	}
-
-	if f.MaxPowerToday != nil {
-		s.MaxPower = *f.MaxPowerToday
-	}
+	return s
 
 }
 
-func NewState() (*State, error) {
+func NewState() (State, error) {
 	s := State{}
-	return &s, nil
+	return s, nil
 }
