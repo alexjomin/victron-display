@@ -27,16 +27,19 @@ Roadmap:
 
 ### Basic concepts
 
-```
+#### Hardware
+```mermaid
 flowchart LR
-    subgraph hardware
-    MPTT(Victron MPTT) --> R[Rasp Pico]
-    end
-    subgraph software
-    R --> P[Parsing]
-    P -- "map[string]string{}" --> Frame
-    Frame -- "struct{}" --> State
-    end
+    MPTT(Victron MPTT) --> R[Rasp Pico];
+    R --> LCD;
+```
+
+#### Software
+```mermaid
+flowchart LR
+    R["serial data"] --> P[Parsing];
+    P -- "map[string]string{}" --> Frame;
+    Frame -- "struct{}" --> State;
 ```
 
 ### Hardware
