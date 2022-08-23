@@ -66,7 +66,7 @@ func main() {
 					continue
 				}
 				state = state.Update(f)
-				println(state.BatteryVoltage, state.OperationState)
+				println(state.BatteryVoltage, state.PanelVoltage, state.OperationState)
 
 				runtime.ReadMemStats(&ms)
 				println("Used: ", ms.HeapInuse, " Free: ", ms.HeapIdle, " Meta: ", ms.GCSys)

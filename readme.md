@@ -43,7 +43,7 @@ flowchart LR
 
 #### Socket
 
-You will need a `JST PH 4` female socket to conntect your Victron device to the Raspberry
+You will need a `JST PH 4` female socket to connect your Victron device to the Raspberry
 
 <img src="doc/img/plug.jpg"  width="200" />
 
