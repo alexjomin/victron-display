@@ -69,7 +69,7 @@ func main() {
 				println(state.BatteryVoltage, state.OperationState)
 
 				runtime.ReadMemStats(&ms)
-				println("Heap before GC. Used: ", ms.HeapInuse, " Free: ", ms.HeapIdle, " Meta: ", ms.GCSys)
+				println("Used: ", ms.HeapInuse, " Free: ", ms.HeapIdle, " Meta: ", ms.GCSys)
 
 			}
 

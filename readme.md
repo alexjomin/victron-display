@@ -24,7 +24,22 @@ Roadmap:
 - [ ] Add a display
 - [ ] Testing, optimizing, reliability
 
-### Hardware 
+
+### Basic concepts
+
+```
+flowchart LR
+    subgraph hardware
+    MPTT(Victron MPTT) --> R[Rasp Pico]
+    end
+    subgraph software
+    R --> P[Parsing]
+    P -- "map[string]string{}" --> Frame
+    Frame -- "struct{}" --> State
+    end
+```
+
+### Hardware
 
 #### Socket
 
@@ -36,6 +51,7 @@ You will need a `JST PH 4` female socket to conntect your Victron device to the 
 
 In this POC I used a Rasbberry Pico, cheap and well supported by TinyGO: https://tinygo.org/docs/reference/microcontrollers/pico/
 
+<img src="doc/img/pico.jpeg"  width="200" />
 
 ### Flash the pico
 
