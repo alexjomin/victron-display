@@ -7,14 +7,24 @@ import (
 
 type OperationState string
 
+const (
+	StateOFF        = "OFF"
+	StateLowPower   = "Low power"
+	StateFault      = "Fault"
+	StateBulk       = "Bulk"
+	StateAbsorption = "Absorption"
+	StateFloat      = "Float"
+	StateInverting  = "Invverting"
+)
+
 var operationStates = map[string]string{
-	"0": "OFF",
-	"1": "Low power",
-	"2": "Fault",
-	"3": "Bulk",
-	"4": "Absorption",
-	"5": "Float",
-	"9": "Inverting",
+	"0": StateOFF,
+	"1": StateLowPower,
+	"2": StateFault,
+	"3": StateBulk,
+	"4": StateAbsorption,
+	"5": StateFloat,
+	"9": StateInverting,
 }
 
 var productList = map[string]string{
@@ -184,7 +194,7 @@ func (f Frame) parseKV(k, v string) (rf Frame, err error) {
 		if err != nil {
 			return f, toError("can't parse instantaneous power" + v)
 		}
-		f.InstantaneousPower = p
+		rf.InstantaneousPower = p
 
 	case LoadCurrent:
 		c, err := parseInt(v)
@@ -212,7 +222,7 @@ func (f Frame) parseKV(k, v string) (rf Frame, err error) {
 		if err != nil {
 			return f, toError("can't parse max power today: " + v)
 		}
-		f.MaxPowerToday = s
+		rf.MaxPowerToday = s
 
 	case MaxPowerYesterday:
 		s, err := parseInt(v)
@@ -247,7 +257,7 @@ func (f Frame) parseKV(k, v string) (rf Frame, err error) {
 		if err != nil {
 			return f, toError("can't parse device" + v)
 		}
-		f.RelayState = s
+		rf.RelayState = s
 
 	case SerialNumber:
 		rf.SerialNumber = v

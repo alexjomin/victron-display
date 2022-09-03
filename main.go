@@ -1,29 +1,38 @@
 package main
 
 import (
-	"machine"
-	"runtime"
+	"time"
 
 	"github.com/alexjomin/victron/vedirect"
+	"tinygo.org/x/drivers/ssd1306"
+)
+
+var (
+	currentPage = 0
+	display     ssd1306.Device
+	state       vedirect.State
 )
 
 const (
-	baudRate = 19200
+	baudRate      = 19200
+	numberOfpages = 4
 )
 
-func main() {
-	led := machine.LED
-	led.Configure(machine.PinConfig{Mode: machine.PinOutput})
-
-	uart := machine.UART0
-	c := machine.UARTConfig{
-		BaudRate: baudRate,
-		TX:       machine.UART0_TX_PIN,
-		RX:       machine.UART0_RX_PIN,
+func bg() {
+	for {
+		time.Sleep(time.Second * 5)
+		displayPage()
+		incPage()
 	}
-	err := uart.Configure(c)
+}
+
+func main() {
+
+	go bg()
+
+	uart, err := initUART()
 	if err != nil {
-		led.High()
+		println(err)
 	}
 
 	parser, err := vedirect.NewParser()
@@ -31,23 +40,26 @@ func main() {
 		println(err)
 	}
 
-	state, err := vedirect.NewState()
+	state, err = vedirect.NewState()
 	if err != nil {
 		println(err)
 	}
 
-	ms := runtime.MemStats{}
+	display, err = initDisplay()
+	if err != nil {
+		println(err)
+	}
+
+	welcomePage(&display)
 
 	for {
 		if uart.Buffered() > 0 {
-			led.High()
-
 			data, err := uart.ReadByte()
 			if err != nil {
 				println(err)
 				continue
 			}
-			// print(string(data))
+
 			parser, err = parser.ParseByte(data)
 			if err != nil {
 				println(err)
@@ -66,15 +78,9 @@ func main() {
 					continue
 				}
 				state = state.Update(f)
-				println(state.BatteryVoltage, state.PanelVoltage, state.OperationState)
-
-				runtime.ReadMemStats(&ms)
-				println("Used: ", ms.HeapInuse, " Free: ", ms.HeapIdle, " Meta: ", ms.GCSys)
-
 			}
-
-			led.Low()
-
 		}
+		time.Sleep(time.Microsecond * 100)
+
 	}
 }

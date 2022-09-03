@@ -1,6 +1,6 @@
-# Victron Display 
+# Victron Display
 
-![](doc/img/hacking.jpg)
+![](doc/img/hacking-v2.jpg)
 
 ## Introduction
 
@@ -21,8 +21,9 @@ Roadmap:
 - [X] Connect to the MPTT
 - [X] Flashing the pico nano with firmware
 - [X] Refactoring to avoid heap allocations
-- [ ] Add a display
-- [ ] Testing, optimizing, reliability
+- [X] Add a display
+- [X] Testing
+- [ ] Optimizing and reliability
 
 
 ### Basic concepts
@@ -82,5 +83,5 @@ Here some adjumemts
   - ex `func (m *myStruct) myMethod error` --> `func (m myStruct) myMethod (m myStruct, err error)`
 
 ```
-tinygo build -o firmware.uf2 -target=pico -print-allocs=.  main.go 2> >(grep victron)
+tinygo build -o firmware.uf2 -target=pico -print-allocs=. 2> >(grep victron)
 ```

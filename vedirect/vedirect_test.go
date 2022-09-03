@@ -49,7 +49,7 @@ func TestParser_ParseByte(t *testing.T) {
 						t.Errorf("NewFrame error = %v", err)
 					}
 					s = s.Update(f)
-					t.Logf("%+v", s)
+					t.Logf("%+v", f)
 				}
 			}
 		})
