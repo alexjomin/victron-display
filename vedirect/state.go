@@ -21,7 +21,10 @@ type State struct {
 	BatteryCurrent    int
 
 	MaxPower       int
+	YieldToday     int
 	OperationState string
+
+	InstantaneousPower int
 }
 
 func (s State) Update(f Frame) State {
@@ -67,12 +70,15 @@ func (s State) Update(f Frame) State {
 	s.LoadCurrent = f.LoadCurrent
 	s.LoadOutputState = f.LoadOutputState
 	s.MaxPower = f.MaxPowerToday
-
+	s.YieldToday = f.YieldToday
+	s.InstantaneousPower = f.InstantaneousPower
 	return s
 
 }
 
 func NewState() (State, error) {
-	s := State{}
+	s := State{
+		OperationState: StateAbsorption,
+	}
 	return s, nil
 }
