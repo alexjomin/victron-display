@@ -14,6 +14,7 @@ import (
 
 var (
 	white = color.RGBA{255, 255, 255, 255}
+	out   = make([]byte, 5)
 )
 
 func incPage() {
@@ -47,10 +48,6 @@ func initDisplay() (display ssd1306.Device, err error) {
 
 }
 
-func formatVoltage(v int) string {
-	return fmt.Sprintf("%.2f V", float64(v)/1000.0)
-}
-
 func welcomePage(display *ssd1306.Device) {
 	display.SetBuffer(loading)
 	tinyfont.WriteLine(display, &freesans.Regular9pt7b, 32, 16, "Loading", color.RGBA{255, 255, 255, 255})
@@ -64,6 +61,7 @@ func displayPage() {
 
 	if currentPage == 0 {
 		display.Command(ssd1306.DISPLAYON)
+		// The charger is not charging
 		if state.OperationState == vedirect.StateFloat {
 			display.SetBuffer(charged)
 			tinyfont.WriteLine(&display, &freesans.Regular9pt7b, 50, 36, state.OperationState, white)
@@ -76,16 +74,16 @@ func displayPage() {
 
 	} else if currentPage == 1 {
 		display.SetBuffer(sun)
-		pv := formatVoltage(state.PanelVoltage)
-		pw := fmt.Sprintf("%d W", state.PanelPower)
+		pv := vedirect.FormatVoltage(state.PanelVoltage)
+		pw := vedirect.FormatPower(state.PanelPower)
 		tinyfont.WriteLine(&display, &freesans.Regular9pt7b, 50, 25, pv, white)
 		tinyfont.WriteLine(&display, &freesans.Regular9pt7b, 50, 50, pw, white)
 
 	} else if currentPage == 2 {
 		display.SetBuffer(battery)
-		bv := formatVoltage(state.BatteryVoltage)
-		bvmin := "Min: " + formatVoltage(state.MinBatteryVoltage)
-		bvmax := "Max: " + formatVoltage(state.MaxBatteryVoltage)
+		bv := vedirect.FormatVoltage(state.BatteryVoltage)
+		bvmin := "Min: " + vedirect.FormatVoltage(state.MinBatteryVoltage)
+		bvmax := "Max: " + vedirect.FormatVoltage(state.MaxBatteryVoltage)
 
 		tinyfont.WriteLine(&display, &freesans.Regular9pt7b, 50, 25, bv, white)
 		tinyfont.WriteLine(&display, &proggy.TinySZ8pt7b, 50, 40, bvmin, white)
