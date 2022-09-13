@@ -22,6 +22,7 @@ Roadmap:
 - [X] Flashing the pico nano with firmware
 - [X] Refactoring to avoid heap allocations
 - [X] Add a display
+- [X] Add a button
 - [X] Testing
 - [ ] Optimizing and reliability
 
@@ -85,3 +86,7 @@ Here some adjumemts
 ```
 tinygo build -o firmware.uf2 -target=pico -print-allocs=. 2> >(grep victron)
 ```
+
+### Pico Pinout
+
+<img src="doc/img/pico.png"  width="200" />
