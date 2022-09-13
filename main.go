@@ -1,6 +1,7 @@
 package main
 
 import (
+	"machine"
 	"time"
 
 	"github.com/alexjomin/victron/vedirect"
@@ -19,10 +20,17 @@ const (
 )
 
 func bg() {
+	button := machine.GP13
+	led := machine.LED
+	led.Configure(machine.PinConfig{Mode: machine.PinOutput})
+	button.Configure(machine.PinConfig{Mode: machine.PinInputPulldown})
 	for {
-		time.Sleep(time.Second * 5)
-		displayPage()
-		incPage()
+		if button.Get() {
+			incPage()
+			displayPage()
+		}
+		time.Sleep(time.Millisecond * 200)
+
 	}
 }
 
