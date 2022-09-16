@@ -9,9 +9,11 @@ import (
 )
 
 var (
-	currentPage = 0
-	display     ssd1306.Device
-	state       vedirect.State
+	currentPage             = 0
+	display                 ssd1306.Device
+	state                   vedirect.State
+	lastClic                = time.Now()
+	minimunDelayBetweenClic = time.Millisecond * 500
 )
 
 const (
@@ -20,17 +22,17 @@ const (
 )
 
 func bg() {
-	button := machine.GP13
-	led := machine.LED
-	led.Configure(machine.PinConfig{Mode: machine.PinOutput})
-	button.Configure(machine.PinConfig{Mode: machine.PinInputPulldown})
 	for {
-		if button.Get() {
+		button := machine.GP13
+		button.Configure(machine.PinConfig{Mode: machine.PinInputPulldown})
+		now := time.Now()
+		delta := now.Sub(lastClic)
+		if button.Get() && delta > minimunDelayBetweenClic {
 			incPage()
 			displayPage()
+			lastClic = now
 		}
 		time.Sleep(time.Millisecond * 200)
-
 	}
 }
 
