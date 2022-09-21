@@ -8,6 +8,11 @@ import (
 	"tinygo.org/x/drivers/ssd1306"
 )
 
+func initButton() error {
+	button.Configure(machine.PinConfig{Mode: machine.PinInputPulldown})
+	return nil
+}
+
 var (
 	currentPage             = 0
 	display                 ssd1306.Device

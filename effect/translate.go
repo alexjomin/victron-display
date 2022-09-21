@@ -29,3 +29,15 @@ func Translate(buffer []byte, offset, w, h int) []byte {
 	}
 	return target
 }
+
+func CreateEmptyBuffer(w, h int) []byte {
+	size := w * h / 8
+	target := []byte{}
+
+	// initialize empty target slice
+	for i := 0; i < size; i++ {
+		target = append(target, 0)
+	}
+
+	return target
+}

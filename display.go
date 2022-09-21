@@ -56,6 +56,11 @@ func welcomePage(display *ssd1306.Device) {
 	display.SetBuffer(loading)
 	tinyfont.WriteLine(display, &freesans.Regular9pt7b, 32, 16, "Loading", color.RGBA{255, 255, 255, 255})
 	tinyfont.WriteLine(display, &proggy.TinySZ8pt7b, 10, 55, "Captain Gantu v1.0", white)
+
+	// cb := display.GetBuffer()
+	// eb := effect.CreateEmptyBuffer(128, 64)
+	// buf := append(eb, cb...)
+	// display.SetBuffer(buf[128:1152])
 	display.Display()
 }
 
