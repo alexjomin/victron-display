@@ -48,6 +48,10 @@ func initDisplay() (display ssd1306.Device, err error) {
 
 }
 
+func fade(display *ssd1306.Device) {
+	// buffer := display.GetBuffer()
+}
+
 func welcomePage(display *ssd1306.Device) {
 	display.SetBuffer(loading)
 	tinyfont.WriteLine(display, &freesans.Regular9pt7b, 32, 16, "Loading", color.RGBA{255, 255, 255, 255})

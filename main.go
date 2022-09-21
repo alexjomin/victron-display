@@ -14,6 +14,7 @@ var (
 	state                   vedirect.State
 	lastClic                = time.Now()
 	minimunDelayBetweenClic = time.Millisecond * 500
+	button                  = machine.GP13
 )
 
 const (
@@ -23,10 +24,10 @@ const (
 
 func bg() {
 	for {
-		button := machine.GP13
-		button.Configure(machine.PinConfig{Mode: machine.PinInputPulldown})
 		now := time.Now()
 		delta := now.Sub(lastClic)
+
+		// it the button is pushed and debounce time elapsed
 		if button.Get() && delta > minimunDelayBetweenClic {
 			incPage()
 			displayPage()
@@ -37,6 +38,11 @@ func bg() {
 }
 
 func main() {
+
+	err := initButton()
+	if err != nil {
+		panic(err)
+	}
 
 	go bg()
 
@@ -91,6 +97,5 @@ func main() {
 			}
 		}
 		time.Sleep(time.Microsecond * 100)
-
 	}
 }
