@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image/color"
 	"machine"
+	"time"
 
 	"github.com/alexjomin/victron/vedirect"
 	"tinygo.org/x/drivers/ssd1306"
@@ -53,6 +54,9 @@ func welcomePage(display *ssd1306.Device) {
 	tinyfont.WriteLine(display, &freesans.Regular9pt7b, 32, 16, "Loading", color.RGBA{255, 255, 255, 255})
 	tinyfont.WriteLine(display, &proggy.TinySZ8pt7b, 10, 55, "Captain Gantu v1.0", white)
 	display.Display()
+	time.Sleep(time.Second * 4)
+	currentPage = 4
+	displayPage()
 }
 
 func displayPage() {

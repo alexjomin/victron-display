@@ -14,6 +14,7 @@ var (
 	state                   vedirect.State
 	lastClic                = time.Now()
 	minimunDelayBetweenClic = time.Millisecond * 500
+	timeout                 = time.Second * 30
 )
 
 const (
@@ -31,6 +32,11 @@ func bg() {
 			incPage()
 			displayPage()
 			lastClic = now
+		}
+		if delta > timeout && currentPage != 4 {
+			lastClic = now
+			currentPage = 4
+			displayPage()
 		}
 		time.Sleep(time.Millisecond * 200)
 	}
