@@ -42,8 +42,19 @@ func button() {
 
 }
 
+func clearDisplayAfterTimeout() {
+	for {
+		time.Sleep(timeout)
+		if time.Now().Sub(lastClic) >= timeout && currentPage != 4 {
+			currentPage = 4
+			displayPage()
+		}
+	}
+}
+
 func main() {
 
+	go clearDisplayAfterTimeout()
 	button()
 
 	uart, err := initUART()
