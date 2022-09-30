@@ -97,6 +97,5 @@ func main() {
 			}
 		}
 		time.Sleep(time.Microsecond * 100)
-
 	}
 }
