@@ -13,7 +13,7 @@ var (
 	display                 ssd1306.Device
 	state                   vedirect.State
 	lastClic                = time.Now()
-	minimunDelayBetweenClic = time.Millisecond * 500
+	minimunDelayBetweenClic = time.Millisecond * 300
 	timeout                 = time.Second * 30
 )
 
@@ -22,29 +22,29 @@ const (
 	numberOfpages = 4
 )
 
-func bg() {
-	for {
-		button := machine.GP13
-		button.Configure(machine.PinConfig{Mode: machine.PinInputPulldown})
-		now := time.Now()
-		delta := now.Sub(lastClic)
-		if button.Get() && delta > minimunDelayBetweenClic {
+func button() {
+	button := machine.GP13
+	button.Configure(machine.PinConfig{Mode: machine.PinInputPulldown})
+
+	callback := func(p machine.Pin) {
+		delta := time.Now().Sub(lastClic)
+		if delta > minimunDelayBetweenClic {
 			incPage()
 			displayPage()
-			lastClic = now
+			lastClic = time.Now()
 		}
-		if delta > timeout && currentPage != 4 {
-			lastClic = now
-			currentPage = 4
-			displayPage()
-		}
-		time.Sleep(time.Millisecond * 200)
 	}
+
+	err := button.SetInterrupt(machine.PinRising, callback)
+	if err != nil {
+		println(err)
+	}
+
 }
 
 func main() {
 
-	go bg()
+	button()
 
 	uart, err := initUART()
 	if err != nil {
