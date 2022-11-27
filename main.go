@@ -22,7 +22,7 @@ const (
 	numberOfpages = 4
 )
 
-func button() {
+func initButton() {
 	button := machine.GP13
 	button.Configure(machine.PinConfig{Mode: machine.PinInputPulldown})
 
@@ -39,7 +39,6 @@ func button() {
 	if err != nil {
 		println(err)
 	}
-
 }
 
 func clearDisplayAfterTimeout() {
@@ -55,7 +54,7 @@ func clearDisplayAfterTimeout() {
 func main() {
 
 	go clearDisplayAfterTimeout()
-	button()
+	initButton()
 
 	uart, err := initUART()
 	if err != nil {
