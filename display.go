@@ -7,7 +7,9 @@ import (
 	"time"
 
 	"github.com/alexjomin/victron/vedirect"
+	"tinygo.org/x/drivers/gc9a01"
 	"tinygo.org/x/drivers/ssd1306"
+
 	"tinygo.org/x/tinyfont"
 	"tinygo.org/x/tinyfont/freesans"
 	"tinygo.org/x/tinyfont/proggy"
@@ -26,33 +28,28 @@ func incPage() {
 	}
 }
 
-func initDisplay() (display ssd1306.Device, err error) {
-	err = machine.I2C0.Configure(machine.I2CConfig{
-		Frequency: machine.TWI_FREQ_400KHZ,
+func initDisplay() (display gc9a01.Device, err error) {
+	machine.SPI1.Configure(machine.SPIConfig{
+		Frequency: 100000000,
+	})
+	display = gc9a01.New(machine.SPI1, machine.Pin(12), machine.Pin(8), machine.Pin(9), machine.Pin(25))
+	display.Configure(gc9a01.Config{
+		Orientation: gc9a01.HORIZONTAL,
+		Width:       240,
+		Height:      240,
 	})
 
-	if err != nil {
-		return
-	}
-
-	display = ssd1306.NewI2C(machine.I2C0)
-
-	display.Configure(ssd1306.Config{
-		Address: 0x3C,
-		Width:   128,
-		Height:  64,
-	})
-
-	display.ClearDisplay()
+	black := color.RGBA{0, 0, 0, 255}
+	display.FillScreen(black)
 
 	return display, err
 
 }
 
-func welcomePage(display *ssd1306.Device) {
-	display.SetBuffer(loading)
-	tinyfont.WriteLine(display, &freesans.Regular9pt7b, 32, 16, "Loading", color.RGBA{255, 255, 255, 255})
-	tinyfont.WriteLine(display, &proggy.TinySZ8pt7b, 10, 55, "Captain Gantu v1.0", white)
+func welcomePage(display *gc9a01.Device) {
+	// display.SetBuffer(loading)
+	tinyfont.WriteLine(display, &freesans.Bold18pt7b, 52, 120, "Loading", color.RGBA{255, 255, 255, 255})
+	tinyfont.WriteLine(display, &freesans.Regular12pt7b, 20, 150, "Captain Gantu v1.0", white)
 	display.Display()
 	time.Sleep(time.Second * 4)
 	currentPage = 4
@@ -61,30 +58,30 @@ func welcomePage(display *ssd1306.Device) {
 
 func displayPage() {
 
-	display.ClearBuffer()
+	// display.ClearBuffer()
 
 	if currentPage == 0 {
-		display.Command(ssd1306.DISPLAYON)
+		// display.Command(gc9a01.DISPLAYON)
 		// The charger is not charging
 		if state.OperationState == vedirect.StateFloat {
-			display.SetBuffer(charged)
+			// display.SetBuffer(charged)
 			tinyfont.WriteLine(&display, &freesans.Regular9pt7b, 50, 36, state.OperationState, white)
 		} else {
-			display.SetBuffer(inCharge)
+			// display.SetBuffer(inCharge)
 			tinyfont.WriteLine(&display, &freesans.Regular9pt7b, 42, 28, state.OperationState, white)
 			bc := fmt.Sprintf("%d A", state.BatteryCurrent)
 			tinyfont.WriteLine(&display, &proggy.TinySZ8pt7b, 43, 42, bc, white)
 		}
 
 	} else if currentPage == 1 {
-		display.SetBuffer(sun)
+		// display.SetBuffer(sun)
 		pv := vedirect.FormatVoltage(state.PanelVoltage)
 		pw := vedirect.FormatPower(state.PanelPower)
 		tinyfont.WriteLine(&display, &freesans.Regular9pt7b, 50, 25, pv, white)
 		tinyfont.WriteLine(&display, &freesans.Regular9pt7b, 50, 50, pw, white)
 
 	} else if currentPage == 2 {
-		display.SetBuffer(battery)
+		// display.SetBuffer(battery)
 		bv := vedirect.FormatVoltage(state.BatteryVoltage)
 		bvmin := "Min: " + vedirect.FormatVoltage(state.MinBatteryVoltage)
 		bvmax := "Max: " + vedirect.FormatVoltage(state.MaxBatteryVoltage)
@@ -94,7 +91,7 @@ func displayPage() {
 		tinyfont.WriteLine(&display, &proggy.TinySZ8pt7b, 50, 50, bvmax, white)
 	} else if currentPage == 3 {
 
-		display.SetBuffer(plug)
+		// display.SetBuffer(plug)
 		lc := fmt.Sprintf("%d A - %d W", state.LoadCurrent, state.InstantaneousPower)
 		yp := fmt.Sprintf("Today: %d W", state.YieldToday)
 		mp := fmt.Sprintf("Max: %d W", state.MaxPower)
