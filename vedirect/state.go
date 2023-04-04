@@ -12,7 +12,7 @@ type State struct {
 	PanelPower   int
 	PanelVoltage int
 
-	LoadCurrent     int
+	LoadCurrent     float64
 	LoadOutputState bool
 
 	MinBatteryVoltage int
@@ -78,7 +78,7 @@ func (s State) Update(f Frame) State {
 
 func NewState() (State, error) {
 	s := State{
-		OperationState: StateAbsorption,
+		OperationState: StateOFF,
 	}
 	return s, nil
 }

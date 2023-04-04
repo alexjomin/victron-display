@@ -15,18 +15,23 @@ var (
 	lastClic                = time.Now()
 	minimunDelayBetweenClic = time.Millisecond * 300
 	timeout                 = time.Second * 30
+	water000                = machine.GP10
+	water033                = machine.GP11
+	water066                = machine.GP12
+	water100                = machine.GP13
+
+	button = machine.GP15
 )
 
 const (
 	baudRate      = 19200
-	numberOfpages = 4
+	numberOfpages = 5
 )
 
 func initButton() {
-	button := machine.GP13
 	button.Configure(machine.PinConfig{Mode: machine.PinInputPulldown})
 
-	callback := func(p machine.Pin) {
+	refreshScreen := func(p machine.Pin) {
 		delta := time.Now().Sub(lastClic)
 		if delta > minimunDelayBetweenClic {
 			incPage()
@@ -35,7 +40,7 @@ func initButton() {
 		}
 	}
 
-	err := button.SetInterrupt(machine.PinRising, callback)
+	err := button.SetInterrupt(machine.PinRising, refreshScreen)
 	if err != nil {
 		println(err)
 	}
@@ -44,14 +49,18 @@ func initButton() {
 func clearDisplayAfterTimeout() {
 	for {
 		time.Sleep(timeout)
-		if time.Now().Sub(lastClic) >= timeout && currentPage != 4 {
-			currentPage = 4
+		if time.Now().Sub(lastClic) >= timeout && currentPage != pageStandBy {
+			currentPage = pageStandBy
 			displayPage()
 		}
 	}
 }
 
 func main() {
+
+	water000.Configure(machine.PinConfig{
+		Mode: machine.PinInput,
+	})
 
 	go clearDisplayAfterTimeout()
 	initButton()

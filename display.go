@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"image/color"
 	"machine"
 	"time"
@@ -16,6 +15,10 @@ import (
 var (
 	white = color.RGBA{255, 255, 255, 255}
 	out   = make([]byte, 5)
+)
+
+const (
+	pageStandBy = 5
 )
 
 func incPage() {
@@ -55,7 +58,7 @@ func welcomePage(display *ssd1306.Device) {
 	tinyfont.WriteLine(display, &proggy.TinySZ8pt7b, 10, 55, "Captain Gantu v1.0", white)
 	display.Display()
 	time.Sleep(time.Second * 4)
-	currentPage = 4
+	currentPage = pageStandBy
 	displayPage()
 }
 
@@ -66,13 +69,14 @@ func displayPage() {
 	if currentPage == 0 {
 		display.Command(ssd1306.DISPLAYON)
 		// The charger is not charging
-		if state.OperationState == vedirect.StateFloat {
+		if state.OperationState == vedirect.StateFloat || state.OperationState == vedirect.StateOFF {
 			display.SetBuffer(charged)
 			tinyfont.WriteLine(&display, &freesans.Regular9pt7b, 50, 36, state.OperationState, white)
 		} else {
 			display.SetBuffer(inCharge)
 			tinyfont.WriteLine(&display, &freesans.Regular9pt7b, 42, 28, state.OperationState, white)
-			bc := fmt.Sprintf("%d A", state.BatteryCurrent)
+			// bc := fmt.Sprintf("%d A", state.BatteryCurrent)
+			bc := vedirect.IntToString(state.BatteryCurrent)
 			tinyfont.WriteLine(&display, &proggy.TinySZ8pt7b, 43, 42, bc, white)
 		}
 
@@ -95,14 +99,30 @@ func displayPage() {
 	} else if currentPage == 3 {
 
 		display.SetBuffer(plug)
-		lc := fmt.Sprintf("%d A - %d W", state.LoadCurrent, state.InstantaneousPower)
-		yp := fmt.Sprintf("Today: %d W", state.YieldToday)
-		mp := fmt.Sprintf("Max: %d W", state.MaxPower)
+		lc := vedirect.Ftoa(state.LoadCurrent)
+		// lc := fmt.Sprintf("%d A - %d W", state.LoadCurrent, state.InstantaneousPower)
+		// yp := fmt.Sprintf("Today: %d W", state.YieldToday)
+		// mp := fmt.Sprintf("Max: %d W", state.MaxPower)
+		yp := vedirect.IntToString(state.YieldToday) + " W"
+		mp := vedirect.IntToString(state.MaxPower) + "W"
 		tinyfont.WriteLine(&display, &freesans.Regular9pt7b, 50, 25, lc, white)
 		tinyfont.WriteLine(&display, &proggy.TinySZ8pt7b, 50, 40, yp, white)
 		tinyfont.WriteLine(&display, &proggy.TinySZ8pt7b, 50, 50, mp, white)
 
 	} else if currentPage == 4 {
+		display.SetBuffer(drop)
+		lc := "Eau"
+		level := GetWaterLevel(WaterLevel{
+			Level000: water000.Get(),
+			Level033: water033.Get(),
+			Level066: water066.Get(),
+			Level100: water100.Get(),
+		})
+
+		tinyfont.WriteLine(&display, &freesans.Regular9pt7b, 50, 25, lc, white)
+		tinyfont.WriteLine(&display, &proggy.TinySZ8pt7b, 50, 40, level, white)
+
+	} else if currentPage == pageStandBy {
 		display.Command(ssd1306.DISPLAYOFF)
 	}
 

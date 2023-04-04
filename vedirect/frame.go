@@ -2,7 +2,6 @@ package vedirect
 
 import (
 	"errors"
-	"strconv"
 )
 
 type OperationState string
@@ -53,25 +52,25 @@ var productList = map[string]string{
 }
 
 type Frame struct {
-	BatteryCurrent     int    `json:"battery_current,omitempty"`
-	DaySequenceNumber  int    `json:"day_sequence_number,omitempty"`
-	ErrorCode          string `json:"error_code,omitempty"`
-	FirmwareVersion    string `json:"firmware_version,omitempty"`
-	InstantaneousPower int    `json:"instantaneous_power,omitempty"`
-	LoadCurrent        int    `json:"load_current,omitempty"`
-	LoadOutputState    bool   `json:"load_output_state,omitempty"`
-	MainBatteryVoltage int    `json:"main_battery_voltage,omitempty"`
-	MaxPowerToday      int    `json:"max_power_today,omitempty"`
-	MaxPowerYesterday  int    `json:"max_power_yesterday,omitempty"`
-	PanelPower         int    `json:"panel_power,omitempty"`
-	PanelVoltage       int    `json:"panel_voltage,omitempty"`
-	ProductName        string `json:"product_id,omitempty"`
-	RelayState         bool   `json:"relay_state,omitempty"`
-	SerialNumber       string `json:"serial_number,omitempty"`
-	StateOfOperation   string `json:"state_of_operation,omitempty"`
-	YieldToday         int    `json:"yield_today,omitempty"`
-	YieldTotal         int    `json:"yield_total,omitempty"`
-	YieldYesterday     int    `json:"yield_yesterday,omitempty"`
+	BatteryCurrent     int     `json:"battery_current,omitempty"`
+	DaySequenceNumber  int     `json:"day_sequence_number,omitempty"`
+	ErrorCode          string  `json:"error_code,omitempty"`
+	FirmwareVersion    string  `json:"firmware_version,omitempty"`
+	InstantaneousPower int     `json:"instantaneous_power,omitempty"`
+	LoadCurrent        float64 `json:"load_current,omitempty"`
+	LoadOutputState    bool    `json:"load_output_state,omitempty"`
+	MainBatteryVoltage int     `json:"main_battery_voltage,omitempty"`
+	MaxPowerToday      int     `json:"max_power_today,omitempty"`
+	MaxPowerYesterday  int     `json:"max_power_yesterday,omitempty"`
+	PanelPower         int     `json:"panel_power,omitempty"`
+	PanelVoltage       int     `json:"panel_voltage,omitempty"`
+	ProductName        string  `json:"product_id,omitempty"`
+	RelayState         bool    `json:"relay_state,omitempty"`
+	SerialNumber       string  `json:"serial_number,omitempty"`
+	StateOfOperation   string  `json:"state_of_operation,omitempty"`
+	YieldToday         int     `json:"yield_today,omitempty"`
+	YieldTotal         int     `json:"yield_total,omitempty"`
+	YieldYesterday     int     `json:"yield_yesterday,omitempty"`
 }
 
 func NewFrame(kv KeyValue) (f Frame, err error) {
@@ -84,12 +83,8 @@ func NewFrame(kv KeyValue) (f Frame, err error) {
 	return
 }
 
-func toBoolPointer(b bool) *bool {
-	return &b
-}
-
 func parseInt(v string) (i int, err error) {
-	return strconv.Atoi(v)
+	return Atoi(v)
 }
 
 func parseLoadOutputState(v string) (state bool, err error) {
@@ -170,7 +165,7 @@ func (f Frame) parseKV(k, v string) (rf Frame, err error) {
 		if err != nil {
 			return f, toError("can't parse battery value: " + v)
 		}
-		rf.BatteryCurrent = i
+		rf.BatteryCurrent = i / 1000
 
 	case DaySequenceNumber:
 		d, err := parseInt(v)
@@ -201,7 +196,8 @@ func (f Frame) parseKV(k, v string) (rf Frame, err error) {
 		if err != nil {
 			return f, toError("can't parse load current: " + v)
 		}
-		rf.LoadCurrent = c
+		fc := intToFloat(c)
+		rf.LoadCurrent = fc
 
 	case LoadOutputState:
 		s, err := parseLoadOutputState(v)
